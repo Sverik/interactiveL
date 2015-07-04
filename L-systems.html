@@ -1,0 +1,100 @@
+<html>
+<head>
+<script src="Notation.js"></script>
+<script src="DesignView.js"></script>
+<script src="PreView.js"></script>
+<script>
+
+var design;
+var preview;
+
+    window.requestAnimFrame = (function(){
+      return  window.requestAnimationFrame       || 
+              window.webkitRequestAnimationFrame || 
+              window.mozRequestAnimationFrame    || 
+              window.oRequestAnimationFrame      || 
+              window.msRequestAnimationFrame     || 
+              function( callback ){
+                window.setTimeout(callback, 1000 / 60);
+              };
+    })();
+
+function onLoad() {
+	var vertices = [];
+	vertices.push(new Vertice(50, 20));
+	vertices.push(new Vertice(150, 30));
+	vertices.push(new Vertice(150, 130));
+	vertices.push(new Vertice(70, 10));
+
+	var lines = [];
+	lines.push(new Line(vertices[0], vertices[1]));
+	lines.push(new Line(vertices[1], vertices[2]));
+	lines.push(new Line(vertices[1], vertices[3]));
+	
+	var system = new System();
+	// AX
+	system.axiom = [Tokens.Z, Tokens.X];
+	// X=X+YA+
+	system.setRule(Tokens.X, [
+		Tokens.X,
+		Tokens.LEFT,
+		Tokens.Y,
+		Tokens.Z,
+		Tokens.RIGHT
+	]);
+	// Y=-AX-Y
+	system.setRule(Tokens.Y, [
+		Tokens.RIGHT,
+		Tokens.Z,
+		Tokens.X,
+		Tokens.RIGHT,
+		Tokens.Y
+	]);
+
+/*
+	// F
+	system.axiom = [Tokens.X];
+	// F+F-F-F+F
+	system.setRule(Tokens.X, [
+		Tokens.X,
+		Tokens.LEFT,
+		Tokens.X,
+		Tokens.RIGHT,
+		Tokens.X,
+		Tokens.RIGHT,
+		Tokens.X,
+		Tokens.LEFT,
+		Tokens.X
+	]);
+*/
+
+	design = new DesignView(document.getElementById("design"), vertices, lines);
+	vertices = new Array();
+	lines = new Array();
+	system.getIterationLines(12, vertices, lines);
+	preview = new PreView(document.getElementById("preview"), vertices, lines);
+
+	frame();
+}
+
+function frame() {
+	//requestAnimFrame(frame);
+	
+	design.frame();
+	preview.frame();
+}
+
+</script>
+</head>
+<body onLoad="onLoad()">
+<p>
+<canvas id="design" width="200" height="200" style="border:1px solid #aaaaaa;">
+</canvas>
+</p>
+<p>
+<canvas id="preview" width="200" height="200" style="border:1px solid #aaaaaa;">
+</canvas>
+</p>
+
+</body>
+</html>
