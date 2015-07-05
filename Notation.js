@@ -56,16 +56,33 @@ System.prototype.getIteration = function(iter) {
 
 System.prototype.getIterationLines = function(iter, vertices, lines) {
 	var tokens = this.getIteration(iter);
-	this.toLines(this.angleRad, tokens, vertices, lines);
+	return this.toLines(this.angleRad, tokens, vertices, lines);
+}
+
+function updateBounds(bounds, vertex) {
+	if (vertex.x < bounds.minX) {
+		bounds.minX = vertex.x;
+	}
+	if (vertex.x > bounds.maxX) {
+		bounds.maxX = vertex.x;
+	}
+	if (vertex.y < bounds.minY) {
+		bounds.minY = vertex.y;
+	}
+	if (vertex.y > bounds.maxY) {
+		bounds.maxY = vertex.y;
+	}
 }
 
 System.prototype.toLines = function(rotAngleRad, tokens, vertices, lines) {
-	var minX = 0;
-	var maxX = 0;
-	var minY = 0;
-	var maxY = 0;
+	var bounds = {
+		minX : 0,
+		maxX : 0,
+		minY : 0,
+		maxY : 0
+	}
 	var a = 0;
-	var vert = new Vertice(100, 100);
+	var vert = new Vertice(0, 0);
 	vertices.push(vert);
 	for (var i = 0 ; i < tokens.length ; i++) {
 		switch (tokens[i]) {
@@ -78,7 +95,7 @@ System.prototype.toLines = function(rotAngleRad, tokens, vertices, lines) {
 			case Tokens.X:
 			case Tokens.Y:
 			case Tokens.Z:
-				var dx = 1;
+				var dx = 4;
 				var dy = 0;
 				var dxr = dx * Math.cos(a) - dy * Math.cos(a);
 				var dyr = dx * Math.sin(a) + dy * Math.sin(a);
@@ -87,9 +104,11 @@ System.prototype.toLines = function(rotAngleRad, tokens, vertices, lines) {
 				var line = new Line(vert, newVert);
 				lines.push(line);
 				vert = newVert;
+				updateBounds(bounds, vert);
 				break;
 		}
 	}
+	return bounds;
 }
 /*
 60
