@@ -2,7 +2,6 @@ var PreView = function(canvas, system, iter) {
 	this.system = system;
 	this.iter = iter;
 	this.canvas = canvas;
-	this.vertices = new Array();
 	this.lines = new Array();
 	this.ctx = this.canvas.getContext("2d");
 }
@@ -15,7 +14,7 @@ PreView.prototype.drawLine = function(v1, v2) {
 }
 
 PreView.prototype.frame = function() {
-	var bounds = this.system.getIterationLines(this.iter, this.vertices, this.lines);
+	var bounds = this.system.getIterationLines(this.iter, this.lines);
 	console.log(bounds);
 	this.ctx.setTransform(1, 0, 0, 1, 0, 0);
 	// TODO do not assume rectangular canvas

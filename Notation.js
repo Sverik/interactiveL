@@ -27,6 +27,8 @@ var System = function() {
 	this.angleRad = Math.PI / 2;
 	this.axiom = new Array();
 	this.rules = {};
+	this.tokensCache = new Array();
+	this.linesCache = new Array();
 }
 
 System.prototype.setRule = function(lhs, tokens) {
@@ -47,11 +49,17 @@ System.prototype.iterate = function(tokens) {
 }
 
 System.prototype.getIteration = function(iter) {
-	var tokens = new Array().concat(this.axiom);
-	for (var i = 0 ; i < iter ; i++) {
-		tokens = this.iterate(tokens);
+	if (this.tokensCache[iter] != null) {
+		return this.tokensCache[iter];
 	}
-	return tokens;
+	
+	if (iter == 0) {
+		this.tokensCache[0] = this.axiom;
+		return this.axiom;
+	}
+	
+	this.tokensCache[iter] = this.iterate(this.getIteration(iter - 1));
+	return this.tokensCache[iter];
 }
 
 System.prototype.getIterationLines = function(iter, vertices, lines) {
@@ -110,8 +118,3 @@ System.prototype.toLines = function(rotAngleRad, tokens, vertices, lines) {
 	}
 	return bounds;
 }
-/*
-60
-X
-X = X - X ++ XX -- X + X
-*/
