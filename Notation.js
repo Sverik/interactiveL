@@ -49,7 +49,7 @@ System.prototype.iterate = function(tokens) {
 }
 
 System.prototype.getIteration = function(iter) {
-	if (this.tokensCache[iter] != null) {
+	if (this.tokensCache.length > iter && this.tokensCache[iter] != null) {
 		return this.tokensCache[iter];
 	}
 	
@@ -59,6 +59,7 @@ System.prototype.getIteration = function(iter) {
 	}
 	
 	this.tokensCache[iter] = this.iterate(this.getIteration(iter - 1));
+	console.log("iter " + iter + " -> " + this.tokensCache[iter].length + " tokens");
 	return this.tokensCache[iter];
 }
 

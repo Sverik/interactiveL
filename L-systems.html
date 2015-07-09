@@ -9,6 +9,7 @@ var design;
 var preview0;
 var preview1;
 var preview2;
+var preview3;
 
     window.requestAnimFrame = (function(){
       return  window.requestAnimationFrame       || 
@@ -74,8 +75,9 @@ function onLoad() {
 	vertices = new Array();
 	lines = new Array();
 	preview0 = new PreView(document.getElementById("preview0"), system, 3);
-	preview1 = new PreView(document.getElementById("preview1"), system, 4);
-	preview2 = new PreView(document.getElementById("preview2"), system, 5);
+	preview1 = new PreView(document.getElementById("preview1"), system, 6);
+	preview2 = new PreView(document.getElementById("preview2"), system, 11);
+	preview3 = new PreView(document.getElementById("preview3"), system, 15);
 
 	frame();
 }
@@ -87,6 +89,7 @@ function frame() {
 	preview0.frame();
 	preview1.frame();
 	preview2.frame();
+	preview3.frame();
 }
 
 </script>
@@ -96,9 +99,10 @@ function frame() {
 <canvas id="design" width="200" height="200" style="border:1px solid #aaaaaa;"></canvas>
 </p>
 <p>
-<canvas id="preview0" width="200" height="200" style="border:1px solid #aaaaaa;"></canvas>
-<canvas id="preview1" width="200" height="200" style="border:1px solid #aaaaaa;"></canvas>
+<canvas id="preview0" width="100" height="100" style="border:1px solid #aaaaaa;"></canvas>
+<canvas id="preview1" width="150" height="150" style="border:1px solid #aaaaaa;"></canvas>
 <canvas id="preview2" width="200" height="200" style="border:1px solid #aaaaaa;"></canvas>
+<canvas id="preview3" width="250" height="250" style="border:1px solid #aaaaaa;"></canvas>
 </p>
 
 </body>
