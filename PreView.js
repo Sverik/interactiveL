@@ -7,10 +7,8 @@ var PreView = function(canvas, system, iter) {
 }
 
 PreView.prototype.drawLine = function(v1, v2) {
-	this.ctx.beginPath();
 	this.ctx.moveTo(v1.x, v1.y);
 	this.ctx.lineTo(v2.x, v2.y);
-	this.ctx.stroke();
 }
 
 PreView.prototype.frame = function() {
@@ -29,7 +27,9 @@ PreView.prototype.frame = function() {
 	this.ctx.scale(w / biggerSize, w / biggerSize);
 	this.ctx.translate(-bounds.minX + padding, -bounds.minY + padding);
 	this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+	this.ctx.beginPath();
 	for (var i = 0 ; i < this.lines.length ; i++) {
 		this.drawLine(this.lines[i].v1, this.lines[i].v2);
 	}
+	this.ctx.stroke();
 }
