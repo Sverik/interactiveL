@@ -8,10 +8,11 @@ function dst2(x1, y1, x2, y2) {
 
 
 
-var DesignView = function (canvas, vertices, lines) {
+var DesignView = function (canvas, vertices, lines, system) {
 	this.canvas = canvas;
 	this.vertices = vertices;
 	this.lines = lines;
+	this.system = system;
 	this.ctx = this.canvas.getContext("2d");
 	this.mX = 0;
 	this.mY = 0;
@@ -19,7 +20,17 @@ var DesignView = function (canvas, vertices, lines) {
 	var self = this;
 	canvas.addEventListener('mousemove', function(evt){self.mouseMove(evt);});
 	canvas.addEventListener('mousedown', function(evt){self.mD = true;});
-	canvas.addEventListener('mouseup', function(evt){self.mD = false;});
+//	canvas.addEventListener('mouseup', function(evt){self.mD = false;});
+	canvas.addEventListener('mouseup', function(evt){
+		self.mD = false;
+		self.system.setRule(Tokens.X, [
+			Tokens.X,
+			Tokens.LEFT,
+			Tokens.X,
+			Tokens.RIGHT,
+			Tokens.X
+		]);
+	});
 };
 
 DesignView.prototype.mouseMove = function(evt) {

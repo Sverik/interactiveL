@@ -1,3 +1,5 @@
+var TOKENS_MAX_LEN = 100000;
+
 var Tokens = Object.freeze({
 	LEFT : 0,
 	RIGHT : 1,
@@ -27,12 +29,16 @@ var System = function() {
 	this.angleRad = Math.PI / 2;
 	this.axiom = new Array();
 	this.rules = {};
+	this.version = 1;
 	this.tokensCache = new Array();
 	this.linesCache = new Array();
 }
 
 System.prototype.setRule = function(lhs, tokens) {
 	this.rules[lhs] = tokens;
+	this.version++;
+	this.tokensCache = new Array();
+	this.linesCache = new Array();
 }
 
 System.prototype.iterate = function(tokens) {
@@ -43,6 +49,10 @@ System.prototype.iterate = function(tokens) {
 			res = res.concat(rule);
 		} else {
 			res.push(tokens[i]);
+		}
+		if (res.length >= TOKENS_MAX_LEN) {
+			console.log("TOKENS_MAX_LEN=" + TOKENS_MAX_LEN + " reached");
+			break;
 		}
 	}
 	return res;

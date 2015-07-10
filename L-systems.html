@@ -35,6 +35,7 @@ function onLoad() {
 	lines.push(new Line(vertices[1], vertices[3]));
 	
 	var system = new System();
+/*	// Dragon
 	// AX
 	system.axiom = [Tokens.Z, Tokens.X];
 	// X=X+YA+
@@ -53,8 +54,8 @@ function onLoad() {
 		Tokens.RIGHT,
 		Tokens.Y
 	]);
-
-/*
+*/
+/**/
 	// F
 	system.axiom = [Tokens.X];
 	// F+F-F-F+F
@@ -69,21 +70,21 @@ function onLoad() {
 		Tokens.LEFT,
 		Tokens.X
 	]);
-*/
+/**/
 
-	design = new DesignView(document.getElementById("design"), vertices, lines);
+	design = new DesignView(document.getElementById("design"), vertices, lines, system);
 	vertices = new Array();
 	lines = new Array();
-	preview0 = new PreView(document.getElementById("preview0"), system, 3);
-	preview1 = new PreView(document.getElementById("preview1"), system, 6);
-	preview2 = new PreView(document.getElementById("preview2"), system, 11);
-	preview3 = new PreView(document.getElementById("preview3"), system, 15);
+	preview0 = new PreView(document.getElementById("preview0"), system, 0);
+	preview1 = new PreView(document.getElementById("preview1"), system, 1);
+	preview2 = new PreView(document.getElementById("preview2"), system, 4);
+	preview3 = new PreView(document.getElementById("preview3"), system, 8);
 
 	frame();
 }
 
 function frame() {
-	//requestAnimFrame(frame);
+	requestAnimFrame(frame);
 	
 	design.frame();
 	preview0.frame();
