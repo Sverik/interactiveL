@@ -26,7 +26,7 @@ var Line = function (v1, v2) {
 }
 
 var System = function() {
-	this.angleRad = Math.PI / 2;
+	this.angleRad = - Math.PI / 2;
 	this.axiom = new Array();
 	this.rules = {};
 	this.version = 1;
