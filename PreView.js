@@ -20,7 +20,12 @@ PreView.prototype.frame = function() {
 
 		this.nextDrawIdx = 0;
 		this.lines = new Array();
-		var bounds = this.system.getIterationLines(this.iter, new Array(), this.lines);
+		var iterLines = this.system.getIterationLines(this.iter);
+		var bounds = iterLines.bounds;
+		this.lines = iterLines.lines;
+		if (this.system.version != this.system.getIterVersion(this.iter)) {
+			return;
+		}
 		this.lastVersion = this.system.version;
 
 		this.ctx.setTransform(1, 0, 0, 1, 0, 0);

@@ -1,4 +1,16 @@
-var TOKENS_MAX_LEN = 50000;
+var TOKENS_MAX_LEN = 100000;
+var PROCESS_LINES_PER_FRAME = 100;
+
+var Bounds = function() {
+	this.minX = 0;
+	this.maxX = 0;
+	this.minY = 0;
+	this.maxY = 0;
+}
+
+Bounds.prototype.toString = function() {
+	return "[x: " + this.minX + "..." + this.maxX + ", y: " + this.minY + "..." + this.maxY + "]";
+}
 
 var Tokens = Object.freeze({
 	LEFT : 0,
@@ -25,13 +37,55 @@ var Line = function (v1, v2) {
 	v2.register(this);
 }
 
-var System = function() {
+Line.prototype.toString = function() {
+	return "Line[" + this.v1.x + "," + this.v1.y + " -> " + this.v2.x + "," + this.v2.y + "]";
+}
+
+var System = function(statusDiv) {
+	this.statusDiv = statusDiv;
+	
 	this.angleRad = - Math.PI / 2;
 	this.axiom = new Array();
 	this.rules = {};
 	this.version = 1;
+	this.iterVersion = new Array();
 	this.tokensCache = new Array();
 	this.linesCache = new Array();
+	this.boundsCache = new Array();
+	
+	this.workBounds = new Bounds();
+	this.workLines = new Array();
+	this.nextLinePos = 0;
+	this.workAngle = 0;
+	this.workVert = new Vertice(0, 0);
+}
+
+System.prototype.frame = function() {
+	var iter = 0;
+	for ( ; iter < this.iterVersion.length ; iter++) {
+		if (this.iterVersion[iter] == 0) {
+			break;
+		}
+	}
+	
+	if (iter >= this.iterVersion.length) {
+		this.statusDiv.innerHTML = "Done.";
+		return;
+	}
+	
+	this.statusDiv.innerHTML = "Iteration " + iter + ", calculated " + this.workLines.length + " lines.";
+	var tokens = this.getIteration(iter);
+	var done = this.toLines(this.angleRad, this.getIteration(iter));
+	if (done) {
+		this.boundsCache[iter] = this.workBounds;
+		this.linesCache[iter] = this.workLines;
+		this.iterVersion[iter] = this.version;
+		this.nextLinePos = 0;
+		this.workAngle = 0;
+		this.workVert = new Vertice(0, 0);
+		this.workLines = new Array();
+		this.workBounds = new Bounds();
+	}
 }
 
 System.prototype.updateVersion = function() {
@@ -67,6 +121,14 @@ System.prototype.iterate = function(tokens) {
 	return res;
 }
 
+System.prototype.getIterVersion = function(iter) {
+	if (this.iterVersion.length > iter && this.iterVersion[iter] != undefined) {
+		return this.iterVersion[iter];
+	}
+
+	return 0;
+}
+
 System.prototype.getIteration = function(iter) {
 	if (this.tokensCache.length > iter && this.tokensCache[iter] != null) {
 		return this.tokensCache[iter];
@@ -82,9 +144,25 @@ System.prototype.getIteration = function(iter) {
 	return this.tokensCache[iter];
 }
 
-System.prototype.getIterationLines = function(iter, vertices, lines) {
-	var tokens = this.getIteration(iter);
-	return this.toLines(this.angleRad, tokens, vertices, lines);
+System.prototype.getIterationLines = function(iter) {
+	if (this.linesCache.length > iter && this.linesCache[iter] != undefined && this.linesCache[iter] != null) {
+		return {
+			lines: this.linesCache[iter],
+			bounds: this.boundsCache[iter]
+		};
+	} else {
+		if (this.iterVersion[iter] == undefined || this.iterVersion[iter] != this.version) {
+			this.iterVersion[iter] = 0;
+		}
+		
+		var bounds = new Bounds();
+		bounds.maxX = 1;
+		bounds.maxY = 1;
+		return {
+			lines: new Array(),
+			bounds: bounds
+		};
+	}
 }
 
 function updateBounds(bounds, vertex) {
@@ -102,39 +180,35 @@ function updateBounds(bounds, vertex) {
 	}
 }
 
-System.prototype.toLines = function(rotAngleRad, tokens, vertices, lines) {
-	var bounds = {
-		minX : 0,
-		maxX : 0,
-		minY : 0,
-		maxY : 0
-	}
-	var a = 0;
-	var vert = new Vertice(0, 0);
-	vertices.push(vert);
-	for (var i = 0 ; i < tokens.length ; i++) {
-		switch (tokens[i]) {
+System.prototype.toLines = function(rotAngleRad, tokens) {
+	for (var i = 0 ; i < PROCESS_LINES_PER_FRAME && this.nextLinePos < tokens.length ; i++) {
+		switch (tokens[this.nextLinePos]) {
 			case Tokens.LEFT:
-				a += rotAngleRad;
+				this.workAngle += rotAngleRad;
 				break;
 			case Tokens.RIGHT:
-				a -= rotAngleRad;
+				this.workAngle -= rotAngleRad;
 				break;
 			case Tokens.X:
 			case Tokens.Y:
 			case Tokens.Z:
 				var dx = 4;
 				var dy = 0;
-				var dxr = dx * Math.cos(a) - dy * Math.cos(a);
-				var dyr = dx * Math.sin(a) + dy * Math.sin(a);
-				var newVert = new Vertice(vert.x + dxr, vert.y + dyr);
-				vertices.push(newVert);
-				var line = new Line(vert, newVert);
-				lines.push(line);
-				vert = newVert;
-				updateBounds(bounds, vert);
+				var dxr = dx * Math.cos(this.workAngle) - dy * Math.cos(this.workAngle);
+				var dyr = dx * Math.sin(this.workAngle) + dy * Math.sin(this.workAngle);
+				var newVert = new Vertice(this.workVert.x + dxr, this.workVert.y + dyr);
+				var line = new Line(this.workVert, newVert);
+				this.workLines.push(line);
+				this.workVert = newVert;
+				updateBounds(this.workBounds, this.workVert);
 				break;
 		}
+		this.nextLinePos++;
 	}
-	return bounds;
+	if (this.nextLinePos >= tokens.length) {
+		// done
+		return true;
+	}
+	// not done
+	return false;
 }

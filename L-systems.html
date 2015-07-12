@@ -6,6 +6,7 @@
 <script src="PreView.js"></script>
 <script>
 
+var system;
 var design;
 var preview0;
 var preview1;
@@ -36,7 +37,7 @@ function onLoad() {
 	lines.push(new Line(vertices[1], vertices[2]));
 	lines.push(new Line(vertices[1], vertices[3]));
 	
-	var system = new System();
+	system = new System(document.getElementById("status"));
 /*	// Dragon
 	// AX
 	system.setAxiom([Tokens.Z, Tokens.X]);
@@ -57,7 +58,7 @@ function onLoad() {
 		Tokens.Y
 	]);
 */
-/**/
+/*
 	// F
 	system.setAxiom([Tokens.X]);
 	// F+F-F-F+F
@@ -73,6 +74,16 @@ function onLoad() {
 		Tokens.X
 	]);
 /**/
+	system.setAxiom([Tokens.X]);
+	// F+F-F-F+F
+	system.setRule(Tokens.X, [
+		Tokens.X,
+		Tokens.LEFT,
+		Tokens.X,
+		Tokens.RIGHT,
+		Tokens.X
+	]);
+
 
 	design = new DesignView(document.getElementById("design"), vertices, lines, system);
 	vertices = new Array();
@@ -89,6 +100,7 @@ function onLoad() {
 function frame() {
 	requestAnimFrame(frame);
 	
+	system.frame();
 	design.frame();
 	preview0.frame();
 	preview1.frame();
@@ -110,6 +122,7 @@ function frame() {
 <canvas id="preview2" width="200" height="200" style="border:1px solid #aaaaaa;"></canvas>
 <canvas id="preview3" width="250" height="250" style="border:1px solid #aaaaaa;"></canvas>
 </p>
+<div id="status"></div>
 
 </body>
 </html>
