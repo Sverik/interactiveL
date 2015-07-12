@@ -18,7 +18,7 @@ PreView.prototype.frame = function() {
 	
 	var lines = new Array();
 	var bounds = this.system.getIterationLines(this.iter, new Array(), lines);
-	console.log(bounds);
+//	console.log(bounds);
 	this.ctx.setTransform(1, 0, 0, 1, 0, 0);
 	this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 	// TODO do not assume rectangular canvas

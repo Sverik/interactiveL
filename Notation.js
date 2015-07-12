@@ -1,4 +1,4 @@
-var TOKENS_MAX_LEN = 100000;
+var TOKENS_MAX_LEN = 50000;
 
 var Tokens = Object.freeze({
 	LEFT : 0,
@@ -34,11 +34,20 @@ var System = function() {
 	this.linesCache = new Array();
 }
 
-System.prototype.setRule = function(lhs, tokens) {
-	this.rules[lhs] = tokens;
+System.prototype.updateVersion = function() {
 	this.version++;
 	this.tokensCache = new Array();
 	this.linesCache = new Array();
+}
+
+System.prototype.setAxiom = function(tokens) {
+	this.axiom = tokens;
+	this.updateVersion();
+}
+	
+System.prototype.setRule = function(lhs, tokens) {
+	this.rules[lhs] = tokens;
+	this.updateVersion();
 }
 
 System.prototype.iterate = function(tokens) {
@@ -69,7 +78,7 @@ System.prototype.getIteration = function(iter) {
 	}
 	
 	this.tokensCache[iter] = this.iterate(this.getIteration(iter - 1));
-	console.log("iter " + iter + " -> " + this.tokensCache[iter].length + " tokens");
+//	console.log("iter " + iter + " -> " + this.tokensCache[iter].length + " tokens");
 	return this.tokensCache[iter];
 }
 
