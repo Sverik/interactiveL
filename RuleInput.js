@@ -1,4 +1,3 @@
-console.log("rule");
 var tokenChars = new Array();
 tokenChars[Tokens.LEFT] = '+';
 tokenChars[Tokens.RIGHT] = '-';
@@ -7,11 +6,17 @@ tokenChars[Tokens.Y] = 'Y';
 tokenChars[Tokens.Z] = 'Z';
 console.log("input " + tokenChars);
 
-var RuleInput = function(textInput, system) {
+function getTokenChar( token ) {
+	return tokenChars[token];
+}
+
+var RuleInput = function(textInput, system, setExpression, getExpression) {
 	this.textInput = textInput;
 	var self = this;
 	this.textInput.oninput = function(evt){ self.oninput(evt); };
 	this.system = system;;
+	this.setExpression = setExpression;
+	this.getExpression = getExpression;
 	this.lastVersion = 0;
 }
 
@@ -22,15 +27,13 @@ RuleInput.prototype.oninput = function(evt) {
 			continue;
 		}
 		for (var t = 0 ; t < tokenChars.length ; t++) {
-//			console.log(tokenChars[t] + " vs " + this.textInput.value[i]);
-			if (tokenChars[t] == this.textInput.value[i]) {
+			if (tokenChars[t] == this.textInput.value[i].toUpperCase()) {
 				tokens.push( t );
 				break;
 			}
 		}
 	}
-	console.log("tokens: " + tokens);
-	this.system.setRule(Tokens.X, tokens);
+	this.setExpression(tokens);
 }
 
 RuleInput.prototype.frame = function() {
@@ -44,8 +47,9 @@ RuleInput.prototype.frame = function() {
 	
 	this.textInput.value = "";
 	
-	for (var i = 0 ; i < this.system.rules[Tokens.X].length ; i++) {
-		var token = this.system.rules[Tokens.X][i];
+	var tokens = this.getExpression();
+	for (var i = 0 ; tokens != undefined && tokens != null && i < tokens.length ; i++) {
+		var token = tokens[i];
 		this.textInput.value += tokenChars[token] + ' ';
 	}
 	

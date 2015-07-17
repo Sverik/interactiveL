@@ -14,7 +14,7 @@ var system;
 var design;
 var previews = new Array();
 
-var ruleInput0;
+var ruleInputs = new Array();
 
     window.requestAnimFrame = (function(){
       return  window.requestAnimationFrame       || 
@@ -26,6 +26,42 @@ var ruleInput0;
                 window.setTimeout(callback, 1000 / 60);
               };
     })();
+
+function addAxiomInput() {
+	var container = document.getElementById("ruleContainer");
+	var id = ruleInputs.length;
+	var div = document.createElement('div');
+	div.innerHTML = '<label for="rule_' + id + '">Axiom: <input id="rule_' + id + '" type="text" size="10"></input></label>';
+	container.appendChild( div );
+	
+	ruleInputs[id] = new RuleInput(document.getElementById("rule_" + id), system,
+		function( tokens ) {
+			// setExpression
+			system.setAxiom( tokens );
+		},
+		function() {
+			// getExpression
+			return system.axiom;
+		});
+}
+
+function addRuleInput( token ) {
+	var container = document.getElementById("ruleContainer");
+	var id = ruleInputs.length;
+	var div = document.createElement('div');
+	div.innerHTML = '<label for="rule_' + id + '">' + getTokenChar(token) + ' = <input id="rule_' + id + '" type="text" size="20"></input></label>';
+	container.appendChild( div );
+	
+	ruleInputs[id] = new RuleInput(document.getElementById("rule_" + id), system,
+		function( tokens ) {
+			// setExpression
+			system.setRule( token, tokens );
+		},
+		function() {
+			// getExpression
+			return system.rules[token];
+		});
+}
 
 function addPreview(iter) {
 	var container = document.getElementById("previewContainer");
@@ -55,66 +91,31 @@ function onLoad() {
 	lines.push(new Line(vertices[1], vertices[3]));
 	
 	system = new System(document.getElementById("status"));
-/*	// Dragon
-	// AX
-	system.setAxiom([Tokens.Z, Tokens.X]);
-	// X=X+YA+
-	system.setRule(Tokens.X, [
-		Tokens.X,
-		Tokens.LEFT,
-		Tokens.Y,
-		Tokens.Z,
-		Tokens.RIGHT
-	]);
-	// Y=-AX-Y
-	system.setRule(Tokens.Y, [
-		Tokens.RIGHT,
-		Tokens.Z,
-		Tokens.X,
-		Tokens.RIGHT,
-		Tokens.Y
-	]);
-*/
-/*
-	// F
-	system.setAxiom([Tokens.X]);
-	// F+F-F-F+F
-	system.setRule(Tokens.X, [
-		Tokens.X,
-		Tokens.LEFT,
-		Tokens.X,
-		Tokens.RIGHT,
-		Tokens.X,
-		Tokens.RIGHT,
-		Tokens.X,
-		Tokens.LEFT,
-		Tokens.X
-	]);
-/**/
-	system.setAxiom([Tokens.X, Tokens.LEFT, Tokens.X, Tokens.LEFT, Tokens.X, Tokens.LEFT, Tokens.X, Tokens.LEFT]);
-	// F+F-F-F+F
-	system.setRule(Tokens.X, [
-		Tokens.X,
-		Tokens.LEFT,
-		Tokens.X,
-		Tokens.RIGHT,
-		Tokens.X
-	]);
 
+	system.setAxiom([Tokens.X]);
+	system.setRule(Tokens.X, [
+		Tokens.X,
+		Tokens.LEFT,
+		Tokens.X,
+		Tokens.LEFT
+	]);
 
 	design = new DesignView(document.getElementById("design"), vertices, lines, system);
 	vertices = new Array();
 	lines = new Array();
 
+	addAxiomInput();
+	addRuleInput( Tokens.X );
+	addRuleInput( Tokens.Y );
+	addRuleInput( Tokens.Z );
+	
 	addPreview(0);
 	addPreview(1);
 	addPreview(2);
 	addPreview(4);
 	addPreview(7);
+	addPreview(10);
 	
-	var container = document.getElementById("previewContainer");
-	
-	ruleInput0 = new RuleInput(document.getElementById("rule0"), system);
 	// -X + X - X  - X + X
 	
 	frame();
@@ -125,25 +126,25 @@ function frame() {
 	
 	system.frame();
 	design.frame();
+
 	for (var i = 0 ; i < previews.length ; i++) {
 		previews[i].frame();
 	}
 
-	ruleInput0.frame();
+	for (var i = 0 ; i < ruleInputs.length ; i++) {
+		ruleInputs[i].frame();
+	}
 }
 
 </script>
 </head>
 <body onLoad="onLoad()">
-<p>
 <canvas id="design" width="200" height="200" style="border:1px solid #aaaaaa;"></canvas>
-<label for="rule0">X = <input id="rule0" type="text" size="20"></input></label>
-</p>
+<p id="ruleContainer"></p>
 <div style="float:left">
-<p id="previewContainer">
-</p>
-<p>&nbsp;</p>
-<div id="status"></div>
+	<p id="previewContainer"></p>
+	<p>&nbsp;</p>
+	<div id="status"></div>
 </div>
 
 </body>
