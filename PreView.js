@@ -1,13 +1,16 @@
-var MAX_LINES_PER_FRAME = 100;
+var MAX_LINES_PER_FRAME = 200;
 
-var PreView = function(canvas, system, iter) {
+var PreView = function(canvas, info, system, iter) {
 	this.system = system;
+	this.info = info;
 	this.lastVersion = 0;
 	this.iter = iter;
 	this.canvas = canvas;
 	this.ctx = this.canvas.getContext("2d");
 	this.nextDrawIdx = 0;
 	this.lines = new Array();
+	
+	info.innerHTML = "iter. " + iter;
 }
 
 PreView.prototype.drawLine = function(v1, v2) {
@@ -44,7 +47,7 @@ PreView.prototype.frame = function() {
 		this.ctx.translate(-bounds.minX + padding, -bounds.minY + padding);
 	}
 
-//	console.log(bounds);
+	// console.log(this.iter + " -> " + this.lines.length + ", " + this.canvas.id);
 	this.ctx.beginPath();
 	for (var i = 0 ; i < MAX_LINES_PER_FRAME && this.nextDrawIdx < this.lines.length ; i++) {
 		this.drawLine(this.lines[this.nextDrawIdx].v1, this.lines[this.nextDrawIdx].v2);

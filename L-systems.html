@@ -1,5 +1,9 @@
 <html>
 <head>
+<title>interactiveL</title>
+<style>
+.wrapper {float:left; }
+</style>
 <script src="Notation.js"></script>
 <script src="RuleInput.js"></script>
 <script src="DesignView.js"></script>
@@ -8,10 +12,8 @@
 
 var system;
 var design;
-var preview0;
-var preview1;
-var preview2;
-var preview3;
+var previews = new Array();
+
 var ruleInput0;
 
     window.requestAnimFrame = (function(){
@@ -24,6 +26,21 @@ var ruleInput0;
                 window.setTimeout(callback, 1000 / 60);
               };
     })();
+
+function addPreview(iter) {
+	var container = document.getElementById("previewContainer");
+	var id = previews.length;
+	var wrapperDiv = document.createElement('div');
+	wrapperDiv.className = "wrapper";
+	wrapperDiv.innerHTML =
+		'<canvas id="preview_' + id + '" width="200" height="200" style="border:1px solid #aaaaaa;"></canvas>' +
+		'<div id="info_' + id + '">_' + id + '</div>';
+	container.appendChild(wrapperDiv);
+	previews[id] = new PreView(
+		document.getElementById('preview_' + id),
+		document.getElementById('info_' + id),
+		system, iter);
+}
 
 function onLoad() {
 	var vertices = [];
@@ -74,7 +91,7 @@ function onLoad() {
 		Tokens.X
 	]);
 /**/
-	system.setAxiom([Tokens.X]);
+	system.setAxiom([Tokens.X, Tokens.LEFT, Tokens.X, Tokens.LEFT, Tokens.X, Tokens.LEFT, Tokens.X, Tokens.LEFT]);
 	// F+F-F-F+F
 	system.setRule(Tokens.X, [
 		Tokens.X,
@@ -88,12 +105,18 @@ function onLoad() {
 	design = new DesignView(document.getElementById("design"), vertices, lines, system);
 	vertices = new Array();
 	lines = new Array();
-	preview0 = new PreView(document.getElementById("preview0"), system, 0);
-	preview1 = new PreView(document.getElementById("preview1"), system, 1);
-	preview2 = new PreView(document.getElementById("preview2"), system, 4);
-	preview3 = new PreView(document.getElementById("preview3"), system, 8);
-	ruleInput0 = new RuleInput(document.getElementById("rule0"), system);
 
+	addPreview(0);
+	addPreview(1);
+	addPreview(2);
+	addPreview(4);
+	addPreview(7);
+	
+	var container = document.getElementById("previewContainer");
+	
+	ruleInput0 = new RuleInput(document.getElementById("rule0"), system);
+	// -X + X - X  - X + X
+	
 	frame();
 }
 
@@ -102,10 +125,10 @@ function frame() {
 	
 	system.frame();
 	design.frame();
-	preview0.frame();
-	preview1.frame();
-	preview2.frame();
-	preview3.frame();
+	for (var i = 0 ; i < previews.length ; i++) {
+		previews[i].frame();
+	}
+
 	ruleInput0.frame();
 }
 
@@ -116,13 +139,12 @@ function frame() {
 <canvas id="design" width="200" height="200" style="border:1px solid #aaaaaa;"></canvas>
 <label for="rule0">X = <input id="rule0" type="text" size="20"></input></label>
 </p>
-<p>
-<canvas id="preview0" width="100" height="100" style="border:1px solid #aaaaaa;"></canvas>
-<canvas id="preview1" width="150" height="150" style="border:1px solid #aaaaaa;"></canvas>
-<canvas id="preview2" width="200" height="200" style="border:1px solid #aaaaaa;"></canvas>
-<canvas id="preview3" width="250" height="250" style="border:1px solid #aaaaaa;"></canvas>
+<div style="float:left">
+<p id="previewContainer">
 </p>
+<p>&nbsp;</p>
 <div id="status"></div>
+</div>
 
 </body>
 </html>

@@ -1,5 +1,5 @@
-var TOKENS_MAX_LEN = 100000;
-var PROCESS_LINES_PER_FRAME = 100;
+var TOKENS_MAX_LEN = 200000;
+var PROCESS_LINES_PER_FRAME = 209;
 
 var Bounds = function() {
 	this.minX = 0;
