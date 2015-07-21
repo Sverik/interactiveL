@@ -1,5 +1,6 @@
 var TOKENS_MAX_LEN = 200000;
 var PROCESS_LINES_PER_FRAME = 209;
+var PROCESS_TOKENS_PER_FRAME = 509;
 
 var Bounds = function() {
 	this.minX = 0;
@@ -48,10 +49,14 @@ var System = function(statusDiv) {
 	this.axiom = new Array();
 	this.rules = {};
 	this.version = 1;
-	this.iterVersion = new Array();
+	this.maxWantedIter = 0;
 	this.tokensCache = new Array();
+	this.linesVersion = new Array();
 	this.linesCache = new Array();
 	this.boundsCache = new Array();
+	
+	this.workTokens = new Array();
+	this.workTokensInPos = 0;
 	
 	this.workBounds = new Bounds();
 	this.workLines = new Array();
@@ -61,35 +66,62 @@ var System = function(statusDiv) {
 }
 
 System.prototype.frame = function() {
+	var status = "";
+	
+	// Calculate tokens for all needed iterations.
+	var tokenIter = 0;
+	for ( ; tokenIter <= this.maxWantedIter ; tokenIter++ ) {
+		if ( this.isEmptyArray( this.tokensCache[ tokenIter ] ) ) {
+			break;
+		}
+	}
+
+	if ( tokenIter <= this.maxWantedIter ) {
+		var done = this.calculateTokens( tokenIter );
+		status += "Iter " + tokenIter + " tokens, " + this.workTokensInPos + " calculated.";
+		if ( done ) {
+			this.tokensCache[ tokenIter ] = this.workTokens;
+			this.workTokens = new Array();
+			this.workTokensInPos = 0;
+		}
+	}
+	
+	// Calculate lines for all needed iterations.
 	var iter = 0;
-	for ( ; iter < this.iterVersion.length ; iter++) {
-		if (this.iterVersion[iter] == 0) {
+	for ( ; iter < this.linesVersion.length ; iter++) {
+		if (this.linesVersion[iter] == 0) {
 			break;
 		}
 	}
 	
-	if (iter >= this.iterVersion.length) {
+	if (iter >= this.linesVersion.length) {
 		this.statusDiv.innerHTML = "Done.";
 		return;
 	}
 	
-	this.statusDiv.innerHTML = "Iteration " + iter + ", calculated " + this.workLines.length + " lines.";
-	var tokens = this.getIteration(iter);
-	var done = this.toLines(this.angleRad, this.getIteration(iter));
-	if (done) {
-		this.boundsCache[iter] = this.workBounds;
-		this.linesCache[iter] = this.workLines;
-		this.iterVersion[iter] = this.version;
-		this.nextLinePos = 0;
-		this.workAngle = 0;
-		this.workVert = new Vertice(0, 0);
-		this.workLines = new Array();
-		this.workBounds = new Bounds();
+	var tokens = this.tokensCache[ tokenIter ];
+	if ( ! this.isEmptyArray( tokens ) ) {
+		var done = this.toLines(this.angleRad, tokens);
+		status += " Iter " + iter + " lines, " + this.workLines.length + " calculated.";
+		
+		if (done) {
+			this.boundsCache[iter] = this.workBounds;
+			this.linesCache[iter] = this.workLines;
+			this.linesVersion[iter] = this.version;
+			this.nextLinePos = 0;
+			this.workAngle = 0;
+			this.workVert = new Vertice(0, 0);
+			this.workLines = new Array();
+			this.workBounds = new Bounds();
+		}
 	}
+	
+	this.statusDiv.innerHTML = status;
 }
 
 System.prototype.updateVersion = function() {
 	this.version++;
+	this.maxWantedIter = 0;
 	this.tokensCache = new Array();
 	this.linesCache = new Array();
 }
@@ -104,6 +136,7 @@ System.prototype.setRule = function(lhs, tokens) {
 	this.updateVersion();
 }
 
+/*
 System.prototype.iterate = function(tokens) {
 	var res = new Array();
 	for (var i = 0 ; i < tokens.length ; i++) {
@@ -120,39 +153,59 @@ System.prototype.iterate = function(tokens) {
 	}
 	return res;
 }
+*/
 
 System.prototype.getIterVersion = function(iter) {
-	if (this.iterVersion.length > iter && this.iterVersion[iter] != undefined) {
-		return this.iterVersion[iter];
+	if (this.linesVersion.length > iter && this.linesVersion[iter] != undefined) {
+		return this.linesVersion[iter];
 	}
 
 	return 0;
 }
 
-System.prototype.getIteration = function(iter) {
-	if (this.tokensCache.length > iter && this.tokensCache[iter] != null) {
-		return this.tokensCache[iter];
-	}
-	
+System.prototype.calculateTokens = function(iter) {
 	if (iter == 0) {
-		this.tokensCache[0] = this.axiom;
-		return this.axiom;
+		this.workTokens = this.axiom;
+		return true;
 	}
 	
-	this.tokensCache[iter] = this.iterate(this.getIteration(iter - 1));
-//	console.log("iter " + iter + " -> " + this.tokensCache[iter].length + " tokens");
-	return this.tokensCache[iter];
+	var input = this.tokensCache[iter - 1];
+
+	for (var i = 0 ; i < PROCESS_TOKENS_PER_FRAME && this.workTokensInPos < input.length ; i++) {
+		var rule = this.rules[input[this.workTokensInPos]];
+		if (rule != null && rule != undefined) {
+			Array.prototype.push.apply(this.workTokens, rule);
+		} else {
+			this.workTokens.push(input[i]);
+		}
+		if (this.workTokens.length >= TOKENS_MAX_LEN) {
+			console.log("TOKENS_MAX_LEN=" + TOKENS_MAX_LEN + " reached");
+			break;
+		}
+
+		this.workTokensInPos++;
+	}
+	
+	if (this.workTokensInPos >= input.length || this.workTokensInPos >= TOKENS_MAX_LEN) {
+		// done
+		return true;
+	}
+	// not done
+	return false;
 }
 
 System.prototype.getIterationLines = function(iter) {
+	if (this.maxWantedIter < iter) {
+		this.maxWantedIter = iter;
+	}
 	if (this.linesCache.length > iter && this.linesCache[iter] != undefined && this.linesCache[iter] != null) {
 		return {
 			lines: this.linesCache[iter],
 			bounds: this.boundsCache[iter]
 		};
 	} else {
-		if (this.iterVersion[iter] == undefined || this.iterVersion[iter] != this.version) {
-			this.iterVersion[iter] = 0;
+		if (this.linesVersion[iter] == undefined || this.linesVersion[iter] != this.version) {
+			this.linesVersion[iter] = 0;
 		}
 		
 		var bounds = new Bounds();
@@ -211,4 +264,8 @@ System.prototype.toLines = function(rotAngleRad, tokens) {
 	}
 	// not done
 	return false;
+}
+
+System.prototype.isEmptyArray = function( array ) {
+	return array == undefined || array == null || array.length == 0;
 }
