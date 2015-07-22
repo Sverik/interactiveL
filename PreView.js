@@ -1,4 +1,4 @@
-var MAX_LINES_PER_FRAME = 200;
+var MAX_LINES_PER_FRAME = 308;
 
 var PreView = function(canvas, info, system, iter) {
 	this.system = system;
@@ -47,7 +47,6 @@ PreView.prototype.frame = function() {
 		this.ctx.translate(-bounds.minX + padding, -bounds.minY + padding);
 	}
 
-	// console.log(this.iter + " -> " + this.lines.length + ", " + this.canvas.id);
 	this.ctx.beginPath();
 	for (var i = 0 ; i < MAX_LINES_PER_FRAME && this.nextDrawIdx < this.lines.length ; i++) {
 		this.drawLine(this.lines[this.nextDrawIdx].v1, this.lines[this.nextDrawIdx].v2);

@@ -1,6 +1,6 @@
 var TOKENS_MAX_LEN = 200000;
-var PROCESS_LINES_PER_FRAME = 209;
-var PROCESS_TOKENS_PER_FRAME = 509;
+var PROCESS_LINES_PER_FRAME = 2009;
+var PROCESS_TOKENS_PER_FRAME = 5009;
 
 var Bounds = function() {
 	this.minX = 0;
@@ -99,7 +99,7 @@ System.prototype.frame = function() {
 		return;
 	}
 	
-	var tokens = this.tokensCache[ tokenIter ];
+	var tokens = this.tokensCache[ iter ];
 	if ( ! this.isEmptyArray( tokens ) ) {
 		var done = this.toLines(this.angleRad, tokens);
 		status += " Iter " + iter + " lines, " + this.workLines.length + " calculated.";
@@ -136,25 +136,6 @@ System.prototype.setRule = function(lhs, tokens) {
 	this.updateVersion();
 }
 
-/*
-System.prototype.iterate = function(tokens) {
-	var res = new Array();
-	for (var i = 0 ; i < tokens.length ; i++) {
-		var rule = this.rules[tokens[i]];
-		if (rule != null && rule != undefined) {
-			res = res.concat(rule);
-		} else {
-			res.push(tokens[i]);
-		}
-		if (res.length >= TOKENS_MAX_LEN) {
-			console.log("TOKENS_MAX_LEN=" + TOKENS_MAX_LEN + " reached");
-			break;
-		}
-	}
-	return res;
-}
-*/
-
 System.prototype.getIterVersion = function(iter) {
 	if (this.linesVersion.length > iter && this.linesVersion[iter] != undefined) {
 		return this.linesVersion[iter];
@@ -179,14 +160,14 @@ System.prototype.calculateTokens = function(iter) {
 			this.workTokens.push(input[i]);
 		}
 		if (this.workTokens.length >= TOKENS_MAX_LEN) {
-			console.log("TOKENS_MAX_LEN=" + TOKENS_MAX_LEN + " reached");
+			console.log("TOKENS_MAX_LEN=" + TOKENS_MAX_LEN + " reached, iter " + iter);
 			break;
 		}
 
 		this.workTokensInPos++;
 	}
 	
-	if (this.workTokensInPos >= input.length || this.workTokensInPos >= TOKENS_MAX_LEN) {
+	if (this.workTokensInPos >= input.length || this.workTokens.length >= TOKENS_MAX_LEN) {
 		// done
 		return true;
 	}
