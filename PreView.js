@@ -9,8 +9,11 @@ var PreView = function(canvas, info, system, iter) {
 	this.ctx = this.canvas.getContext("2d");
 	this.nextDrawIdx = 0;
 	this.lines = new Array();
-	
-	info.innerHTML = "iter. " + iter;
+}
+
+PreView.prototype.updateInfo = function() {
+	this.info.innerHTML = "iter. " + this.iter +
+		", drawn " + this.nextDrawIdx + " / " + this.lines.length + " lines";
 }
 
 PreView.prototype.drawLine = function(v1, v2) {
@@ -60,5 +63,7 @@ PreView.prototype.frame = function() {
 		this.nextDrawIdx ++;
 	}
 	this.ctx.stroke();
+	
+	this.updateInfo();
 
 }
