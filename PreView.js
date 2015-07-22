@@ -45,6 +45,13 @@ PreView.prototype.frame = function() {
 		biggerSize += padding * 2;
 		this.ctx.scale(w / biggerSize, w / biggerSize);
 		this.ctx.translate(-bounds.minX + padding, -bounds.minY + padding);
+/*
+		console.log("bounds for " + this.iter + ": ");
+		console.log(bounds.minX);
+		console.log(bounds.maxX);
+		console.log(bounds.minY);
+		console.log(bounds.maxY);
+*/
 	}
 
 	this.ctx.beginPath();

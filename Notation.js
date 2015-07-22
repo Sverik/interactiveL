@@ -119,16 +119,25 @@ System.prototype.frame = function() {
 	this.statusDiv.innerHTML = status;
 }
 
-System.prototype.updateVersion = function() {
+System.prototype.updateVersionLines = function() {
 	this.version++;
+	this.linesCache = new Array();
+}
+
+System.prototype.updateVersion = function() {
+	this.updateVersionLines();
 	this.maxWantedIter = 0;
 	this.tokensCache = new Array();
-	this.linesCache = new Array();
 }
 
 System.prototype.setAxiom = function(tokens) {
 	this.axiom = tokens;
 	this.updateVersion();
+}
+	
+System.prototype.setAngle = function(thetaRad) {
+	this.angleRad = thetaRad;
+	this.updateVersionLines();
 }
 	
 System.prototype.setRule = function(lhs, tokens) {

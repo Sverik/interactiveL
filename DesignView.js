@@ -23,6 +23,7 @@ var DesignView = function (canvas, vertices, lines, system) {
 //	canvas.addEventListener('mouseup', function(evt){self.mD = false;});
 	canvas.addEventListener('mouseup', function(evt){
 		self.mD = false;
+		/*
 		self.system.setRule(Tokens.X, [
 			Tokens.X,
 			Tokens.LEFT,
@@ -30,6 +31,7 @@ var DesignView = function (canvas, vertices, lines, system) {
 			Tokens.RIGHT,
 			Tokens.X
 		]);
+		*/
 	});
 };
 
@@ -37,6 +39,11 @@ DesignView.prototype.mouseMove = function(evt) {
 	var rect = this.canvas.getBoundingClientRect();
 	this.mX = evt.clientX - rect.left;
 	this.mY = evt.clientY - rect.top;
+
+	if (this.mD) {
+		var theta = this.getAngle(this.vertices[0], this.vertices[1], this.vertices[2]);
+		this.system.setAngle(theta);
+	}
 }
 
 DesignView.prototype.drawLine = function(v1, v2) {
@@ -44,6 +51,21 @@ DesignView.prototype.drawLine = function(v1, v2) {
 	this.ctx.moveTo(v1.x, v1.y);
 	this.ctx.lineTo(v2.x, v2.y);
 	this.ctx.stroke();
+}
+
+DesignView.prototype.norm = function(v) {
+	return Math.sqrt(v.x * v.x + v.y * v.y);
+}
+
+/**
+ * Returns angle in radians between vectors v1->v2 and v2->v3.
+ * This is 0 if v1, v2, v3 are on a straight line and v2 is between v1 and v3.
+ */
+DesignView.prototype.getAngle = function(v1, v2, v3) {
+	var tA = Math.atan2(v2.x - v1.x, v2.y - v1.y);
+	var tB = Math.atan2(v3.x - v2.x, v3.y - v2.y);
+	var theta = tA - tB;
+	return theta;
 }
 
 DesignView.prototype.frame = function() {
