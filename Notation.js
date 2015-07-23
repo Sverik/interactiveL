@@ -1,4 +1,5 @@
 var TOKENS_MAX_LEN = 200000;
+var STACK_MAX_SIZE = 100000;
 var PROCESS_LINES_PER_FRAME = 2009;
 var PROCESS_TOKENS_PER_FRAME = 5009;
 
@@ -18,7 +19,12 @@ var Tokens = Object.freeze({
 	RIGHT : 1,
 	X : 2,
 	Y : 3,
-	Z : 4
+	Z : 4,
+	PUSH : 5,
+	POP : 6,
+	F : 7,
+	G : 8,
+	H : 9,
 });
 
 var Vertice = function (x, y) {
@@ -63,6 +69,7 @@ var System = function(statusDiv) {
 	this.nextLinePos = 0;
 	this.workAngle = 0;
 	this.workVert = new Vertice(0, 0);
+	this.workStack = new Array();
 }
 
 System.prototype.frame = function() {
@@ -111,6 +118,7 @@ System.prototype.frame = function() {
 			this.nextLinePos = 0;
 			this.workAngle = 0;
 			this.workVert = new Vertice(0, 0);
+			this.workStack = new Array();
 			this.workLines = new Array();
 			this.workBounds = new Bounds();
 		}
@@ -232,9 +240,9 @@ System.prototype.toLines = function(rotAngleRad, tokens) {
 			case Tokens.RIGHT:
 				this.workAngle -= rotAngleRad;
 				break;
-			case Tokens.X:
-			case Tokens.Y:
-			case Tokens.Z:
+			case Tokens.F:
+			case Tokens.G:
+			case Tokens.H:
 				var dx = 4;
 				var dy = 0;
 				var dxr = dx * Math.cos(this.workAngle) - dy * Math.cos(this.workAngle);
@@ -244,6 +252,23 @@ System.prototype.toLines = function(rotAngleRad, tokens) {
 				this.workLines.push(line);
 				this.workVert = newVert;
 				updateBounds(this.workBounds, this.workVert);
+				break;
+			case Tokens.PUSH:
+				if (this.workStack.length < STACK_MAX_SIZE) {
+					this.workStack.push({
+						angle : this.workAngle,
+						pos : this.workVert
+					});
+				} else {
+					console.log("STACK_MAX_SIZE=" + STACK_MAX_SIZE + " reached");
+				}
+				break;
+			case Tokens.POP:
+				if (this.workStack.length > 0) {
+					var se = this.workStack.pop();
+					this.workAngle = se.angle;
+					this.workVert = se.pos;
+				}
 				break;
 		}
 		this.nextLinePos++;

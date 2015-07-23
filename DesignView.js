@@ -8,8 +8,9 @@ function dst2(x1, y1, x2, y2) {
 
 
 
-var DesignView = function (canvas, vertices, lines, system) {
+var DesignView = function (canvas, angleInput, vertices, lines, system) {
 	this.canvas = canvas;
+	this.angleInput = angleInput;
 	this.vertices = vertices;
 	this.lines = lines;
 	this.system = system;
@@ -20,19 +21,7 @@ var DesignView = function (canvas, vertices, lines, system) {
 	var self = this;
 	canvas.addEventListener('mousemove', function(evt){self.mouseMove(evt);});
 	canvas.addEventListener('mousedown', function(evt){self.mD = true;});
-//	canvas.addEventListener('mouseup', function(evt){self.mD = false;});
-	canvas.addEventListener('mouseup', function(evt){
-		self.mD = false;
-		/*
-		self.system.setRule(Tokens.X, [
-			Tokens.X,
-			Tokens.LEFT,
-			Tokens.X,
-			Tokens.RIGHT,
-			Tokens.X
-		]);
-		*/
-	});
+	canvas.addEventListener('mouseup', function(evt){self.mD = false;});
 };
 
 DesignView.prototype.mouseMove = function(evt) {
@@ -43,6 +32,8 @@ DesignView.prototype.mouseMove = function(evt) {
 	if (this.mD) {
 		var theta = this.getAngle(this.vertices[0], this.vertices[1], this.vertices[2]);
 		this.system.setAngle(theta);
+		var thetaDeg = (theta / Math.PI * 180) | 0;
+		this.angleInput.innerHTML = thetaDeg + "°";
 	}
 }
 

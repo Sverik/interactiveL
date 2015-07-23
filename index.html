@@ -45,11 +45,11 @@ function addAxiomInput() {
 		});
 }
 
-function addRuleInput( token ) {
+function addRuleInput( token, desc ) {
 	var container = document.getElementById("ruleContainer");
 	var id = ruleInputs.length;
 	var div = document.createElement('div');
-	div.innerHTML = '<label for="rule_' + id + '">' + getTokenChar(token) + ' = <input id="rule_' + id + '" type="text" size="20"></input></label>';
+	div.innerHTML = '<label for="rule_' + id + '">' + getTokenChar(token) + ' → <input id="rule_' + id + '" type="text" size="20"></input><i>' + desc + '</i></label>';
 	container.appendChild( div );
 	
 	ruleInputs[id] = new RuleInput(document.getElementById("rule_" + id), system,
@@ -80,34 +80,48 @@ function addPreview(iter) {
 
 function onLoad() {
 	var vertices = [];
-	vertices.push(new Vertice(50, 20));
+	vertices.push(new Vertice(50, 30));
 	vertices.push(new Vertice(150, 30));
 	vertices.push(new Vertice(150, 130));
-	vertices.push(new Vertice(70, 10));
 
 	var lines = [];
 	lines.push(new Line(vertices[0], vertices[1]));
 	lines.push(new Line(vertices[1], vertices[2]));
-//	lines.push(new Line(vertices[1], vertices[3]));
 	
 	system = new System(document.getElementById("status"));
 
-	system.setAxiom([Tokens.X]);
+	// Dragon curve
+	system.setAxiom([Tokens.F, Tokens.X]);
+	// X → X + Y F + 
 	system.setRule(Tokens.X, [
 		Tokens.X,
 		Tokens.LEFT,
+		Tokens.Y,
+		Tokens.F,
+		Tokens.LEFT,
+	]);
+	// Y → - F X - Y 
+	system.setRule(Tokens.Y, [
+		Tokens.RIGHT,
+		Tokens.F,
 		Tokens.X,
-		Tokens.LEFT
+		Tokens.RIGHT,
+		Tokens.Y,
 	]);
 
-	design = new DesignView(document.getElementById("design"), vertices, lines, system);
+	design = new DesignView(document.getElementById("design"), document.getElementById("angleDeg"), vertices, lines, system);
 	vertices = new Array();
 	lines = new Array();
 
 	addAxiomInput();
-	addRuleInput( Tokens.X );
-	addRuleInput( Tokens.Y );
-	addRuleInput( Tokens.Z );
+	var drawForward = "Draw forward";
+	var noDrawing = "-";
+	addRuleInput( Tokens.F, drawForward );
+	addRuleInput( Tokens.G, drawForward );
+	addRuleInput( Tokens.H, drawForward );
+	addRuleInput( Tokens.X, noDrawing );
+	addRuleInput( Tokens.Y, noDrawing );
+	addRuleInput( Tokens.Z, noDrawing );
 	
 	addPreview(0);
 	addPreview(1);
@@ -139,8 +153,22 @@ function frame() {
 </script>
 </head>
 <body onLoad="onLoad()">
-<canvas id="design" width="200" height="200" style="border:1px solid #aaaaaa;"></canvas>
-<p id="ruleContainer"></p>
+<div id="designPanel">
+	<canvas id="design" width="200" height="200" style="border:1px solid #aaaaaa; float:left;"></canvas>
+	<div style="padding-left:10px; float:left">
+		<p id="angle">
+			<span>angle = </span>
+			<span id="angleDeg">90°</span>
+			<input type="button" id="a90" value="π / 2 | 90°"></input>
+		</p>
+		<p>+ : turn left</p>
+		<p>- : turn right</p>
+		<p>[ : push angle and position to stack</p>
+		<p>] : pop angle and position from stack</p>
+		<p id="ruleContainer"></p>
+	</div>
+</div>
+
 <div style="float:left">
 	<p id="previewContainer"></p>
 	<p>&nbsp;</p>

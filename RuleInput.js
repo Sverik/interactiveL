@@ -1,9 +1,14 @@
 var tokenChars = new Array();
 tokenChars[Tokens.LEFT] = '+';
 tokenChars[Tokens.RIGHT] = '-';
+tokenChars[Tokens.F] = 'F';
+tokenChars[Tokens.G] = 'G';
+tokenChars[Tokens.H] = 'H';
 tokenChars[Tokens.X] = 'X';
 tokenChars[Tokens.Y] = 'Y';
 tokenChars[Tokens.Z] = 'Z';
+tokenChars[Tokens.PUSH] = '[';
+tokenChars[Tokens.POP] = ']';
 console.log("input " + tokenChars);
 
 function getTokenChar( token ) {
