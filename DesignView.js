@@ -8,9 +8,9 @@ function dst2(x1, y1, x2, y2) {
 
 
 
-var DesignView = function (canvas, angleInput, vertices, lines, system) {
+var DesignView = function (canvas, setAngleFunc, vertices, lines, system) {
 	this.canvas = canvas;
-	this.angleInput = angleInput;
+	this.setAngleFunc = setAngleFunc;
 	this.vertices = vertices;
 	this.lines = lines;
 	this.system = system;
@@ -31,9 +31,7 @@ DesignView.prototype.mouseMove = function(evt) {
 
 	if (this.mD) {
 		var theta = this.getAngle(this.vertices[0], this.vertices[1], this.vertices[2]);
-		this.system.setAngle(theta);
-		var thetaDeg = (theta / Math.PI * 180) | 0;
-		this.angleInput.innerHTML = thetaDeg + "°";
+		this.setAngleFunc( theta );
 	}
 }
 

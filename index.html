@@ -3,6 +3,7 @@
 <title>interactiveL</title>
 <style>
 .wrapper {float:left; }
+.angleButton {margin:5px;}
 </style>
 <script src="Notation.js"></script>
 <script src="RuleInput.js"></script>
@@ -131,6 +132,46 @@ function addPreviewCheck(container, iter) {
 	container.appendChild(li);
 }
 
+function addAngleButtons() {
+	var container = document.getElementById("angle");
+	container.appendChild( createAngleButton( 5, 36) );
+	container.appendChild( createAngleButton( 1, 6) );
+	container.appendChild( createAngleButton( 1, 4) );
+	container.appendChild( createAngleButton( 1, 3) );
+	container.appendChild( createAngleButton( 2, 5) );
+	container.appendChild( createAngleButton( 1, 2) );
+	container.appendChild( createAngleButton( 2, 3) );
+	container.appendChild( createAngleButton( 3, 4) );
+}
+
+function createAngleButton(dividend, divisor) {
+	var button = document.createElement("input");
+	button.type = "button";
+	button.className = "angleButton";
+	var rad = dividend * Math.PI / divisor;
+	var deg = dividend * 180 / divisor;
+	deg = deg | 0;
+	if (dividend != 1) {
+		button.value = dividend + " ";
+	}
+	button.value += "π";
+	if (divisor != 1) {
+		button.value += " / " + divisor;
+	}
+	button.value += " | " + deg + "°";
+	button.addEventListener('click', function(evt){
+		setAngle(rad);
+	});
+	return button;
+}
+
+function setAngle(thetaRad) {
+		var angleText = document.getElementById("angleDeg");
+		var thetaDeg = (thetaRad / Math.PI * 180) | 0;
+		angleText.innerHTML = thetaDeg + "°";
+		system.setAngle(thetaRad);
+}
+
 function onLoad() {
 	var vertices = [];
 	vertices.push(new Vertice(50, 30));
@@ -162,7 +203,7 @@ function onLoad() {
 		Tokens.Y,
 	]);
 
-	design = new DesignView(document.getElementById("design"), document.getElementById("angleDeg"), vertices, lines, system);
+	design = new DesignView(document.getElementById("design"), setAngle, vertices, lines, system);
 	vertices = new Array();
 	lines = new Array();
 
@@ -177,7 +218,6 @@ function onLoad() {
 	addRuleInput( Tokens.Z, noDrawing );
 	
 	addPreview(4);
-	addPreview(4);
 	addPreview(0);
 	addPreview(1);
 	addPreview(2);
@@ -188,6 +228,8 @@ function onLoad() {
 	for (var i = 0 ; i < 15 ; i++) {
 		addPreviewCheck(previewList, i);
 	}
+	
+	addAngleButtons();
 	
 	// -X + X - X  - X + X
 	
@@ -215,13 +257,12 @@ function frame() {
 </script>
 </head>
 <body onLoad="onLoad()">
-<div id="designPanel">
+<div id="designPanel" style="overflow:auto;">
 	<canvas id="design" width="200" height="200" style="border:1px solid #aaaaaa; float:left;"></canvas>
 	<div style="padding-left:10px; float:left">
 		<p id="angle">
 			<span>angle = </span>
 			<span id="angleDeg">90°</span>
-			<input type="button" id="a90" value="π / 2 | 90°" onclick=""></input>
 		</p>
 		<p>+ : turn left</p>
 		<p>- : turn right</p>
