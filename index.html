@@ -63,19 +63,72 @@ function addRuleInput( token, desc ) {
 		});
 }
 
+function arrayHasOwnIndex(array, prop) {
+	return array.hasOwnProperty(prop) && /^0$|^[1-9]\d*$/.test(prop) && prop <= 4294967294; // 2^32 - 2
+}
+
 function addPreview(iter) {
+	removePreview(iter);
 	var container = document.getElementById("previewContainer");
-	var id = previews.length;
 	var wrapperDiv = document.createElement('div');
 	wrapperDiv.className = "wrapper";
 	wrapperDiv.innerHTML =
-		'<canvas id="preview_' + id + '" width="200" height="200" style="border:1px solid #aaaaaa;"></canvas>' +
-		'<div id="info_' + id + '">_' + id + '</div>';
-	container.appendChild(wrapperDiv);
-	previews[id] = new PreView(
-		document.getElementById('preview_' + id),
-		document.getElementById('info_' + id),
-		system, iter);
+		'<canvas id="preview_' + iter + '" width="200" height="200" style="border:1px solid #aaaaaa;"></canvas>' +
+		'<div id="info_' + iter + '">_' + iter + '</div>';
+	var next = null;
+	for (exIter in previews) {
+		if (!arrayHasOwnIndex(previews, exIter)) {
+			continue;
+		}
+		if (exIter > iter) {
+			next = previews[exIter];
+			break;
+		}
+	}
+	if (next == null) {
+		container.appendChild(wrapperDiv);
+	} else {
+		container.insertBefore(wrapperDiv, next.dom);
+	}
+	previews[iter] = {
+		dom : wrapperDiv,
+		obj : new PreView(
+			document.getElementById('preview_' + iter),
+			document.getElementById('info_' + iter),
+			system, iter)
+	};
+}
+
+function removePreview(iter) {
+	var preview = previews[iter];
+	if (preview == undefined || preview == null) {
+		return;
+	}
+	delete previews[iter];
+	var container = document.getElementById("previewContainer");
+	container.removeChild(preview.dom);
+}
+
+function addPreviewCheck(container, iter) {
+	var input = document.createElement("input");
+	input.id = "pv_" + iter;
+	input.type = "checkbox";
+	input.addEventListener('click', function(evt){
+		if (input.checked) {
+			addPreview(iter);
+		} else {
+			removePreview(iter);
+		}
+	});
+	input.checked = arrayHasOwnIndex(previews, iter);
+
+	var label = document.createElement("label");
+	label.appendChild(input);
+	label.appendChild(document.createTextNode("Iteration " + iter));
+
+	var li = document.createElement("li");
+	li.appendChild(label);
+	container.appendChild(li);
 }
 
 function onLoad() {
@@ -123,12 +176,18 @@ function onLoad() {
 	addRuleInput( Tokens.Y, noDrawing );
 	addRuleInput( Tokens.Z, noDrawing );
 	
+	addPreview(4);
+	addPreview(4);
 	addPreview(0);
 	addPreview(1);
 	addPreview(2);
-	addPreview(4);
 	addPreview(7);
 	addPreview(10);
+
+	var previewList = document.getElementById("previewList");
+	for (var i = 0 ; i < 15 ; i++) {
+		addPreviewCheck(previewList, i);
+	}
 	
 	// -X + X - X  - X + X
 	
@@ -141,8 +200,11 @@ function frame() {
 	system.frame();
 	design.frame();
 
-	for (var i = 0 ; i < previews.length ; i++) {
-		previews[i].frame();
+	for (iter in previews) {
+		if (!arrayHasOwnIndex(previews, exIter)) {
+			continue;
+		}
+		previews[iter].obj.frame();
 	}
 
 	for (var i = 0 ; i < ruleInputs.length ; i++) {
@@ -159,7 +221,7 @@ function frame() {
 		<p id="angle">
 			<span>angle = </span>
 			<span id="angleDeg">90°</span>
-			<input type="button" id="a90" value="π / 2 | 90°"></input>
+			<input type="button" id="a90" value="π / 2 | 90°" onclick=""></input>
 		</p>
 		<p>+ : turn left</p>
 		<p>- : turn right</p>
@@ -167,6 +229,9 @@ function frame() {
 		<p>] : pop angle and position from stack</p>
 		<p id="ruleContainer"></p>
 	</div>
+	<ul id="previewList" style="float:right">
+		Iterations to preview:
+	</ul>
 </div>
 
 <div style="float:left">
