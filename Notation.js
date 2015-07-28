@@ -174,7 +174,7 @@ System.prototype.calculateTokens = function(iter) {
 		if (rule != null && rule != undefined) {
 			Array.prototype.push.apply(this.workTokens, rule);
 		} else {
-			this.workTokens.push(input[i]);
+			this.workTokens.push(input[this.workTokensInPos]);
 		}
 		if (this.workTokens.length >= TOKENS_MAX_LEN) {
 			console.log("TOKENS_MAX_LEN=" + TOKENS_MAX_LEN + " reached, iter " + iter);
