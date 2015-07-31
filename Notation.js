@@ -248,10 +248,12 @@ System.prototype.toLines = function(rotAngleRad, tokens) {
 				var dxr = dx * Math.cos(this.workAngle) - dy * Math.cos(this.workAngle);
 				var dyr = dx * Math.sin(this.workAngle) + dy * Math.sin(this.workAngle);
 				var newVert = new Vertice(this.workVert.x + dxr, this.workVert.y + dyr);
-				var line = new Line(this.workVert, newVert);
-				this.workLines.push(line);
+				if (tokens[this.nextLinePos] != Tokens.H) {
+					var line = new Line(this.workVert, newVert);
+					this.workLines.push(line);
+					updateBounds(this.workBounds, newVert);
+				}
 				this.workVert = newVert;
-				updateBounds(this.workBounds, this.workVert);
 				break;
 			case Tokens.PUSH:
 				if (this.workStack.length < STACK_MAX_SIZE) {
